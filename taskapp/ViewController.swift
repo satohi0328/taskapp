@@ -9,11 +9,11 @@
 import UIKit
 import RealmSwift
 
-class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource {
-    
+class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource ,UISearchBarDelegate{
     
     @IBOutlet weak var tableView: UITableView!
     
+    @IBOutlet weak var searchBar: UISearchBar!
     // Reamインスタンスを取得する
     let realm = try! Realm()
     
@@ -27,6 +27,10 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
         // Do any additional setup after loading the view.
         tableView.delegate = self
         tableView.dataSource = self
+        searchBar.delegate = self
+        searchBar.showsCancelButton = true
+        //        searchBar.scopeButtonTitles = ["aa","ii"]
+        //        searchBar.showsScopeBar = true
     }
     
     // データの数（＝セルの数）を返すメソッド
@@ -108,6 +112,21 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
     // 入力画面から戻ってきた時に TableView を更新させる
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        tableView.reloadData()
+    }
+    
+    // 検索バーによる検索処理
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        taskArray = try! Realm().objects(Task.self).filter("category CONTAINS 'a'")
+//        taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: false)
+        tableView.reloadData()
+        
+    }
+    
+    // 検索バーのCancel押下時
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        print("検索Cancel")
+        taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)
         tableView.reloadData()
     }
 }
