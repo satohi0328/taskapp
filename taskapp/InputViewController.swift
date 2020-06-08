@@ -10,15 +10,19 @@ import UIKit
 import RealmSwift
 import UserNotifications
 
-class InputViewController: UIViewController {
+class InputViewController: UIViewController,UIPickerViewDelegate, UIPickerViewDataSource {
 
     @IBOutlet weak var titleTextField: UITextField!
     @IBOutlet weak var contentsTextView: UITextView!
     @IBOutlet weak var datePicker: UIDatePicker!
-    @IBOutlet weak var categoryTextField: UITextField!
+    @IBOutlet weak var categoryPicker: UIPickerView!
     let realm = try! Realm()
     var task: Task!
+    var wkSelectedCategory:String = ""
+    var arrayCategoryPicker: [String] = [""] // PickerViewに表示するための配列
     
+    var categoryArray = try! Realm().objects(Category.self).sorted(byKeyPath: "id", ascending: true)
+
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -29,13 +33,28 @@ class InputViewController: UIViewController {
         titleTextField.text = task.title
         contentsTextView.text = task.contents
         datePicker.date = task.date
-        categoryTextField.text = task.category
+        // デリゲートの設定
+        categoryPicker.delegate = self
+        categoryPicker.dataSource = self
+        
+        
+        // カテゴリが既に設定されている場合、それを初期選択とする
+        var wkCategoryRow = 0
+        // PickerViewに表示するための配列を定義
+        for i in 0..<categoryArray.count{
+            arrayCategoryPicker.append(categoryArray[i].category)
+            
+            // タスクのカテゴリと一致した場合
+            if categoryArray[i].category == task.category{
+                wkCategoryRow = i + 1
+            }
+        }
+        
+        categoryPicker.selectRow(wkCategoryRow, inComponent: 0, animated:false)
         
         // TextViewに枠線追加
         contentsTextView.layer.borderWidth = 1
         contentsTextView.layer.borderColor = UIColor.black.cgColor
-
-        
     }
     
     @objc func dismissKeyboard(){
@@ -48,14 +67,15 @@ class InputViewController: UIViewController {
             self.task.title = self.titleTextField.text!
             self.task.contents = self.contentsTextView.text
             self.task.date = self.datePicker.date
-            self.task.category = self.categoryTextField.text!
+            self.task.category = arrayCategoryPicker[categoryPicker.selectedRow(inComponent: 0)]
             self.realm.add(self.task, update: .modified)
         }
+        
         setNotification(task: task)
         super.viewWillDisappear(animated)
     }
     
-    // タスクのローカル通知を登録する --- ここから ---
+    // タスクのローカル通知を登録する
     func setNotification(task: Task) {
         let content = UNMutableNotificationContent()
         // タイトルと内容を設定(中身がない場合メッセージ無しで音だけの通知になるので「(xxなし)」を表示する)
@@ -94,6 +114,31 @@ class InputViewController: UIViewController {
             }
         }
     }
+    
+    // Pickerの列の数
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    // Pickerの行の数
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return arrayCategoryPicker.count
+    }
+    
+    // 内容の表示
+    func pickerView(_ pickerView: UIPickerView,
+                    titleForRow row: Int,
+                    forComponent component: Int) -> String? {
+        return arrayCategoryPicker[row]
+    }
+    
+
+    // Pickerで選択されたとき
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        wkSelectedCategory =  arrayCategoryPicker[row]
+        categoryPicker.selectedRow(inComponent: 0)
+    }
+    
     /*
     // MARK: - Navigation
 

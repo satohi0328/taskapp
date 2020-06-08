@@ -28,9 +28,6 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
         tableView.delegate = self
         tableView.dataSource = self
         searchBar.delegate = self
-        searchBar.showsCancelButton = true
-        //        searchBar.scopeButtonTitles = ["aa","ii"]
-        //        searchBar.showsScopeBar = true
     }
     
     // データの数（＝セルの数）を返すメソッド
@@ -89,25 +86,32 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
                     print("---------------/")
                 }
             }
-        } // --- ここまで変更 ---
+        }
     }
     // segue で画面遷移する時に呼ばれる
     override func prepare(for segue: UIStoryboardSegue, sender: Any?){
-        let inputViewController:InputViewController = segue.destination as! InputViewController
-        
-        if segue.identifier == "cellSegue" {
+        switch segue.identifier {
+        case "cellSegue": //テーブルビューのセルを選択したときの遷移
+            let inputViewController:InputViewController = segue.destination as! InputViewController
             let indexPath = self.tableView.indexPathForSelectedRow
             inputViewController.task = taskArray[indexPath!.row]
-        } else {
+            break
+        case "categorySegue": // カテゴリーを追加する場合の遷移
+            // let inputViewController:CategoryViewController = segue.destination as! CategoryViewController
+            // 処理なし
+            break
+        default: // 上記以外、タスク追加する場合の遷移
+            let inputViewController:InputViewController = segue.destination as! InputViewController
             let task = Task()
-            
             let allTasks = realm.objects(Task.self)
             if allTasks.count != 0 {
                 task.id = allTasks.max(ofProperty: "id")! + 1
             }
-            
             inputViewController.task = task
+            break
+            
         }
+        
     }
     // 入力画面から戻ってきた時に TableView を更新させる
     override func viewWillAppear(_ animated: Bool) {
@@ -117,10 +121,9 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
     
     // 検索バーによる検索処理
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        taskArray = try! Realm().objects(Task.self).filter("category CONTAINS 'a'")
-//        taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: false)
+        taskArray = try! Realm().objects(Task.self).filter("category == %@",searchBar.text!)
         tableView.reloadData()
-        
+        showTasks()
     }
     
     // 検索バーのCancel押下時
@@ -128,6 +131,32 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
         print("検索Cancel")
         taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)
         tableView.reloadData()
+    }
+    //検索バーの状態が変わった場合
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        searchCategory(searchBar.text!)
+    }
+    
+    func searchCategory(_ searchText: String) {
+        //検索バーに文字列が存在する場合
+        if searchText != "" {
+            taskArray = try! Realm().objects(Task.self).filter("category == %@",searchText)
+            
+            // 検索バーがからの場合
+        } else {
+            // 全表示
+            taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)
+        }
+        //tableViewを再読み込みする
+        tableView.reloadData()
+    }
+    func showTasks(){
+        print("検索バー　" + searchBar.text!)
+        for wktask in taskArray{
+            print("開始")
+            print(wktask.title)
+            print(wktask.category)
+        }
     }
 }
 

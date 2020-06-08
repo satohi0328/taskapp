@@ -16,6 +16,8 @@
 		A3D6C3902483D3E7002CF9AF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A3D6C38E2483D3E7002CF9AF /* LaunchScreen.storyboard */; };
 		A3D6C398248534AC002CF9AF /* InputViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D6C397248534AC002CF9AF /* InputViewController.swift */; };
 		A3D6C39A24854978002CF9AF /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D6C39924854978002CF9AF /* Task.swift */; };
+		A3D6C39C248C9296002CF9AF /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D6C39B248C9296002CF9AF /* Category.swift */; };
+		A3D6C39E248CF426002CF9AF /* CategoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D6C39D248CF426002CF9AF /* CategoryViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +33,8 @@
 		A3D6C3912483D3E7002CF9AF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A3D6C397248534AC002CF9AF /* InputViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputViewController.swift; sourceTree = "<group>"; };
 		A3D6C39924854978002CF9AF /* Task.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
+		A3D6C39B248C9296002CF9AF /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
+		A3D6C39D248CF426002CF9AF /* CategoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryViewController.swift; sourceTree = "<group>"; };
 		E8D8B14525CBEA55B98061D9 /* Pods-taskapp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-taskapp.release.xcconfig"; path = "Target Support Files/Pods-taskapp/Pods-taskapp.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -89,6 +93,8 @@
 				A3D6C3872483D3E5002CF9AF /* ViewController.swift */,
 				A3D6C397248534AC002CF9AF /* InputViewController.swift */,
 				A3D6C3892483D3E5002CF9AF /* Main.storyboard */,
+				A3D6C39B248C9296002CF9AF /* Category.swift */,
+				A3D6C39D248CF426002CF9AF /* CategoryViewController.swift */,
 				A3D6C39924854978002CF9AF /* Task.swift */,
 				A3D6C38C2483D3E7002CF9AF /* Assets.xcassets */,
 				A3D6C38E2483D3E7002CF9AF /* LaunchScreen.storyboard */,
@@ -214,9 +220,11 @@
 			files = (
 				A3D6C3882483D3E5002CF9AF /* ViewController.swift in Sources */,
 				A3D6C3842483D3E5002CF9AF /* AppDelegate.swift in Sources */,
+				A3D6C39E248CF426002CF9AF /* CategoryViewController.swift in Sources */,
 				A3D6C39A24854978002CF9AF /* Task.swift in Sources */,
 				A3D6C3862483D3E5002CF9AF /* SceneDelegate.swift in Sources */,
 				A3D6C398248534AC002CF9AF /* InputViewController.swift in Sources */,
+				A3D6C39C248C9296002CF9AF /* Category.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
