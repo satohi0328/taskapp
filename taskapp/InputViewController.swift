@@ -45,7 +45,7 @@ class InputViewController: UIViewController,UIPickerViewDelegate, UIPickerViewDa
             arrayCategoryPicker.append(categoryArray[i].category)
             
             // タスクのカテゴリと一致した場合
-            if categoryArray[i].category == task.category{
+            if categoryArray[i].category == task.category.category{
                 wkCategoryRow = i + 1
             }
         }
@@ -67,7 +67,7 @@ class InputViewController: UIViewController,UIPickerViewDelegate, UIPickerViewDa
             self.task.title = self.titleTextField.text!
             self.task.contents = self.contentsTextView.text
             self.task.date = self.datePicker.date
-            self.task.category = arrayCategoryPicker[categoryPicker.selectedRow(inComponent: 0)]
+//            self.task.category = arrayCategoryPicker[categoryPicker.selectedRow(inComponent: 0)]
             self.realm.add(self.task, update: .modified)
         }
         
