@@ -11,7 +11,6 @@ import RealmSwift
 
 class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource , UIPickerViewDelegate, UIPickerViewDataSource{
     
-    
     @IBOutlet weak var tableView: UITableView!
     
     // Reamインスタンスを取得する
@@ -24,17 +23,23 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
     
     var pickerView: UIPickerView = UIPickerView()
     var categoryArray = try! Realm().objects(Category.self)
-
+    
     @IBOutlet weak var categoryTextField: UITextField!
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        
+        // 背景をタップしたらdismissKeyboardメソッドを呼ぶように設定する
+        let tapGesture: UITapGestureRecognizer = UITapGestureRecognizer(target:self, action:#selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        self.view.addGestureRecognizer(tapGesture)
+        
         tableView.delegate = self
         tableView.dataSource = self
         pickerView.delegate = self
         pickerView.dataSource = self
         self.categoryTextField.inputView = pickerView
-
+        
     }
     
     // データの数（＝セルの数）を返すメソッド
@@ -103,10 +108,6 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
             let indexPath = self.tableView.indexPathForSelectedRow
             inputViewController.task = taskArray[indexPath!.row]
             break
-        case "categorySegue": // カテゴリーを追加する場合の遷移
-            // let inputViewController:CategoryViewController = segue.destination as! CategoryViewController
-            // 値の受け渡しなし
-            break
         default: // 上記以外、タスク追加する場合の遷移
             let inputViewController:InputViewController = segue.destination as! InputViewController
             let task = Task()
@@ -126,37 +127,16 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
         tableView.reloadData()
     }
     
-//    // 検索バーによる検索処理
-//    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-//        taskArray = try! Realm().objects(Task.self).filter("category == %@",searchBar.text!)
-//        tableView.reloadData()
-//        showTasks()
-//    }
-//
-//    // 検索バーのCancel押下時
-//    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-//        print("検索Cancel")
-//        taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)
-//        tableView.reloadData()
-//    }
-//    //検索バーの状態が変わった場合
-//    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-//        searchCategory(searchBar.text!)
-//    }
-//
-//    func searchCategory(_ searchText: String) {
-//        //検索バーに文字列が存在する場合
-//        if searchText != "" {
-//            taskArray = try! Realm().objects(Task.self).filter("category == %@",searchText)
-//
-//            // 検索バーがからの場合
-//        } else {
-//            // 全表示
-//            taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)
-//        }
-//        //tableViewを再読み込みする
-//        tableView.reloadData()
-//    }
+    @IBAction func searchCategory(_ sender: Any) {
+        //検索バーに文字列が存在しない場合
+        if categoryTextField.text! == "" {
+            taskArray = realm.objects(Task.self).sorted(byKeyPath: "date", ascending: true)
+        } else{
+            let predicate = NSPredicate(format: "category.category == %@",categoryTextField.text!)
+            taskArray = realm.objects(Task.self).filter(predicate)
+        }
+        tableView.reloadData()
+    }
     
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
@@ -171,6 +151,53 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
                     forComponent component: Int) -> String? {
         return categoryArray[row].category
     }
-
+    // Pickerで選択されたとき
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        categoryTextField.text! =  categoryArray[row].category
+    }
+    
+    @IBAction func SearchCancelButton(_ sender: Any) {
+        taskArray = realm.objects(Task.self).sorted(byKeyPath: "date", ascending: true)
+        categoryTextField.text! = ""
+        tableView.reloadData()
+        
+    }
+    
+    @objc func dismissKeyboard(){
+        // キーボードを閉じる
+        view.endEditing(true)
+    }
+    
+    //    // 検索バーによる検索処理
+    //    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+    //        taskArray = try! Realm().objects(Task.self).filter("category == %@",searchBar.text!)
+    //        tableView.reloadData()
+    //        showTasks()
+    //    }
+    //
+    //    // 検索バーのCancel押下時
+    //    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+    //        print("検索Cancel")
+    //        taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)
+    //        tableView.reloadData()
+    //    }
+    //    //検索バーの状態が変わった場合
+    //    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+    //        searchCategory(searchBar.text!)
+    //    }
+    //
+    //    func searchCategory(_ searchText: String) {
+    //        //検索バーに文字列が存在する場合
+    //        if searchText != "" {
+    //            taskArray = try! Realm().objects(Task.self).filter("category == %@",searchText)
+    //
+    //            // 検索バーがからの場合
+    //        } else {
+    //            // 全表示
+    //            taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)
+    //        }
+    //        //tableViewを再読み込みする
+    //        tableView.reloadData()
+    //    }
 }
 

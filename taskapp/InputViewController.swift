@@ -11,7 +11,7 @@ import RealmSwift
 import UserNotifications
 
 class InputViewController: UIViewController,UIPickerViewDelegate, UIPickerViewDataSource {
-
+    
     @IBOutlet weak var titleTextField: UITextField!
     @IBOutlet weak var contentsTextView: UITextView!
     @IBOutlet weak var datePicker: UIDatePicker!
@@ -19,17 +19,17 @@ class InputViewController: UIViewController,UIPickerViewDelegate, UIPickerViewDa
     let realm = try! Realm()
     var task: Task!
     var wkSelectedCategory:String = ""
-    var arrayCategoryPicker: [String] = [""] // PickerViewに表示するための配列
+    var arrayCategoryPicker: [String] = []// PickerViewに表示するための配列
     
     var categoryArray = try! Realm().objects(Category.self).sorted(byKeyPath: "id", ascending: true)
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         // 背景をタップしたらdismissKeyboardメソッドを呼ぶように設定する
         let tapGesture: UITapGestureRecognizer = UITapGestureRecognizer(target:self, action:#selector(dismissKeyboard))
         self.view.addGestureRecognizer(tapGesture)
-
+        
         titleTextField.text = task.title
         contentsTextView.text = task.contents
         datePicker.date = task.date
@@ -37,24 +37,15 @@ class InputViewController: UIViewController,UIPickerViewDelegate, UIPickerViewDa
         categoryPicker.delegate = self
         categoryPicker.dataSource = self
         
-        
-        // カテゴリが既に設定されている場合、それを初期選択とする
-        var wkCategoryRow = 0
-        // PickerViewに表示するための配列を定義
-        for i in 0..<categoryArray.count{
-            arrayCategoryPicker.append(categoryArray[i].category)
-            
-            // タスクのカテゴリと一致した場合
-            if categoryArray[i].category == task.category.category{
-                wkCategoryRow = i + 1
-            }
-        }
-        
-        categoryPicker.selectRow(wkCategoryRow, inComponent: 0, animated:false)
-        
         // TextViewに枠線追加
         contentsTextView.layer.borderWidth = 1
         contentsTextView.layer.borderColor = UIColor.black.cgColor
+    }
+    
+    override func viewWillAppear(_ animated: Bool){
+        super.viewWillAppear(animated)
+        showCategoryPicker()
+        
     }
     
     @objc func dismissKeyboard(){
@@ -67,7 +58,16 @@ class InputViewController: UIViewController,UIPickerViewDelegate, UIPickerViewDa
             self.task.title = self.titleTextField.text!
             self.task.contents = self.contentsTextView.text
             self.task.date = self.datePicker.date
-//            self.task.category = arrayCategoryPicker[categoryPicker.selectedRow(inComponent: 0)]
+            
+            //カテゴリPickerでカテゴリが選択されている場合
+            if categoryPicker.selectedRow(inComponent: 0) != 0 {
+                self.task.category = categoryArray[categoryPicker.selectedRow(inComponent: 0) - 1]
+                // 上記以外(カテゴリ無選択)の場合
+            } else {
+                // 初期状態のカテゴリクラスを設定
+                self.task.category = nil
+            }
+            
             self.realm.add(self.task, update: .modified)
         }
         
@@ -90,21 +90,21 @@ class InputViewController: UIViewController,UIPickerViewDelegate, UIPickerViewDa
             content.body = task.contents
         }
         content.sound = UNNotificationSound.default
-
+        
         // ローカル通知が発動するtrigger（日付マッチ）を作成
         let calendar = Calendar.current
         let dateComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: task.date)
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
-
+        
         // identifier, content, triggerからローカル通知を作成（identifierが同じだとローカル通知を上書き保存）
         let request = UNNotificationRequest(identifier: String(task.id), content: content, trigger: trigger)
-
+        
         // ローカル通知を登録
         let center = UNUserNotificationCenter.current()
         center.add(request) { (error) in
             print(error ?? "ローカル通知登録 OK")  // error が nil ならローカル通知の登録に成功したと表示します。errorが存在すればerrorを表示します。
         }
-
+        
         // 未通知のローカル通知一覧をログ出力
         center.getPendingNotificationRequests { (requests: [UNNotificationRequest]) in
             for request in requests {
@@ -132,21 +132,48 @@ class InputViewController: UIViewController,UIPickerViewDelegate, UIPickerViewDa
         return arrayCategoryPicker[row]
     }
     
-
     // Pickerで選択されたとき
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         wkSelectedCategory =  arrayCategoryPicker[row]
         categoryPicker.selectedRow(inComponent: 0)
     }
     
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    func showCategoryPicker(){
+        // 配列を初期化
+        arrayCategoryPicker = [""]
+        
+        // カテゴリクラスを取得
+        categoryArray = try! Realm().objects(Category.self).sorted(byKeyPath: "id", ascending: true)
+        // カテゴリが既に設定されている場合、それを初期選択とする
+        var wkCategoryRow = 0
+        // PickerViewに表示するための配列を定義
+        for i in 0..<categoryArray.count{
+            arrayCategoryPicker.append(categoryArray[i].category)
+            
+            // カテゴリが設定されている場合
+            if task.category != nil{
+                // タスクのカテゴリと一致した場合
+                if categoryArray[i].category == task.category!.category{
+                    wkCategoryRow = i + 1
+                }
+            }
+        }
+        
+        // ピッカーをリロードする
+        categoryPicker.reloadAllComponents()
+        
+        categoryPicker.selectRow(wkCategoryRow, inComponent: 0, animated:false)
+        
     }
-    */
-
+    
+    /*
+     // MARK: - Navigation
+     
+     // In a storyboard-based application, you will often want to do a little preparation before navigation
+     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+     // Get the new view controller using segue.destination.
+     // Pass the selected object to the new view controller.
+     }
+     */
+    
 }
