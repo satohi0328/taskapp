@@ -10,7 +10,7 @@ import UIKit
 import RealmSwift
 import UserNotifications
 
-class InputViewController: UIViewController,UIPickerViewDelegate, UIPickerViewDataSource {
+class InputViewController: UIViewController,UIPickerViewDelegate, UIPickerViewDataSource,UITextFieldDelegate {
     
     @IBOutlet weak var titleTextField: UITextField!
     @IBOutlet weak var contentsTextView: UITextView!
@@ -33,9 +33,11 @@ class InputViewController: UIViewController,UIPickerViewDelegate, UIPickerViewDa
         titleTextField.text = task.title
         contentsTextView.text = task.contents
         datePicker.date = task.date
+        
         // デリゲートの設定
         categoryPicker.delegate = self
         categoryPicker.dataSource = self
+        titleTextField.delegate = self
         
         // TextViewに枠線追加
         contentsTextView.layer.borderWidth = 1
@@ -166,6 +168,10 @@ class InputViewController: UIViewController,UIPickerViewDelegate, UIPickerViewDa
         
     }
     
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        titleTextField.resignFirstResponder()
+        return true
+    }
     /*
      // MARK: - Navigation
      
